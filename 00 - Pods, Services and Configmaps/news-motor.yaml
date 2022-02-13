@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: news-motor
+  labels:
+    app: news-motor
+spec:
+  containers:
+    - name: news-motor-container
+      image: aluracursos/sistema-noticias:1
+      ports:
+        - containerPort: 80
+      envFrom:
+        - configMapRef:
+            name: news-motor-configmap

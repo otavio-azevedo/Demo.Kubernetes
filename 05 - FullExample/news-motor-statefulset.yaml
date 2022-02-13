@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: news-motor-statefulset
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: news-motor
+      labels:
+        app: news-motor
+    spec:
+      containers:
+        - name: news-motor-container
+          image: aluracursos/sistema-noticias:1
+          ports:
+            - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: news-motor-configmap
+          volumneMounts:
+            - name: images
+              mountPath: /var/www/html/uploads
+          volumneMounts:
+            - name: images
+              mountPath: /tmp
+          livenessProbe:
+            httpGet:
+              path: / #http://localhost:30001/
+              port: 80  #containerPort
+            periodSeconds: 10 # interval tests
+            failureThreshold: 3 # number of fails to trigger restart
+            initialDelaySeconds: 20 # wait 20 seconds to start tests
+          readinessProbe:
+            httpGet:
+              path: /inserir_noticias.php 
+              port: 80  #containerPort
+            periodSeconds: 10 # interval tests
+            failureThreshold: 5 # number of fails to trigger restart
+            initialDelaySeconds: 3 # wait 3 seconds to start tests  
+      volumnes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: images-pvc  
+        - name: session
+          persistentVolumeClaim:
+            claimName: session-pvc  
+  selector:
+    matchLabels:
+      app: news-motor
+  serviceName: svc-news-motor
